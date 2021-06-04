@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QFont>
 #include <QtGlobal>
+#include <QTime>
 PlayScene3::PlayScene3(QWidget *parent) : QMainWindow(parent)
 {
 
@@ -56,7 +57,7 @@ PlayScene3::PlayScene3(QWidget *parent) : QMainWindow(parent)
        btn1->move(this->width() - btn1->width()-50, this->height() - btn1->height()-300 );
        connect(btn1,&QPushButton::clicked,[=](){
            kaishi=true;
-           this->startTimer(1000);
+           this->startTimer(500);
        });
 }
 
@@ -111,7 +112,8 @@ void PlayScene3::timerEvent(QTimerEvent *)
             if(heizi)   //第一次下黑子
             {
                 heizi=false;
-                int t=rand()%25;
+                qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+                int t=qrand()%25;
                 x=8+t/5;
                 y=8+t%5;
                 array[x][y]=1;
@@ -120,19 +122,6 @@ void PlayScene3::timerEvent(QTimerEvent *)
                 Chess->setParent(this);
                 Chess->move(150+25*y-10,50+25*x-10);
                 Chess->show();
-                if(panduan())
-                {
-
-                    kaishi=false;
-                    QString str="黑子胜利";
-                    label= new QLabel(this);
-                    label->setText(str);
-                    label->setFont(QFont(str,29,QFont::Bold));
-                    label ->setStyleSheet("color:red;");
-                    label->setFixedSize(200,100);
-                    label->move(300,250);
-                    label->show();
-                }
             }
             else
             {
@@ -145,7 +134,43 @@ void PlayScene3::timerEvent(QTimerEvent *)
                 Chess[x][y]->setParent(this);
                 Chess[x][y]->move(150+25*y-10,50+25*x-10);
                 Chess[x][y]->show();
-
+                if(panduan())
+                {
+                    kaishi=false;
+                    QString str="黑子胜利";
+                    label= new QLabel(this);
+                    label->setText(str);
+                    label->setFont(QFont(str,29,QFont::Bold));
+                    label ->setStyleSheet("color:red;");
+                    label->setFixedSize(200,100);
+                    label->move(300,250);
+                    label->show();
+                }
+                else
+                {
+                    //判断是否和局
+                    bool B=true;
+                    for(int i=0;i<20;i++)
+                    {
+                        for(int j=0;j<20;j++)
+                        {
+                            if(array[i][j]==0)
+                                B=false;
+                        }
+                    }
+                    if(B)
+                    {
+                        kaishi=false;
+                        QString str="和局";
+                        label= new QLabel(this);
+                        label->setText(str);
+                        label->setFont(QFont(str,29,QFont::Bold));
+                        label ->setStyleSheet("color:red;");
+                        label->setFixedSize(200,100);
+                        label->move(300,250);
+                        label->show();
+                    }
+                }
             }
             pix=2;
         }
@@ -154,17 +179,20 @@ void PlayScene3::timerEvent(QTimerEvent *)
             if(baizi)       //第一次下白子
             {
                 baizi=false;
-                int n=rand()%9;//随机产生0-8的数
+                qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+                int n=qrand()%9;//随机产生0-8的数
                 while (n==4)     //避免下在黑子的位置
                 {
-                    n=rand()%9+1;
+                    n=qrand()%9+1;
                 }
-                array[x-1+n/3][y-1+n%3]=2;
+                x=x-1+n/3;
+                y=y-1+n%3;
+                array[x][y]=2;
                 QString str=":/res/004.png";
-                Chess[x-1+n/3][y-1+n%3]=new chess(str);
-                Chess[x-1+n/3][y-1+n%3]->setParent(this);
-                Chess[x-1+n/3][y-1+n%3]->move(150+25*(y-1+n/3)-10,50+25*(x-1+n%3)-10);
-                Chess[x-1+n/3][y-1+n%3]->show();
+                Chess[x][y]=new chess(str);
+                Chess[x][y]->setParent(this);
+                Chess[x][y]->move(150+25*y-10,50+25*x-10);
+                Chess[x][y]->show();
             }
             else
             {
@@ -179,10 +207,8 @@ void PlayScene3::timerEvent(QTimerEvent *)
                 Chess[x][y]->show();
                 if(panduan())
                 {
-
                     kaishi=false;
                     QString str="白子胜利";
-                    qDebug()<<str;
                     label= new QLabel(this);
                     label->setText(str);
                     label->setFont(QFont(str,29,QFont::Bold));
@@ -191,8 +217,6 @@ void PlayScene3::timerEvent(QTimerEvent *)
                     label->move(300,250);
                     label->show();
                 }
-
-
                 //判断是否和局
                 bool B=true;
                 for(int i=0;i<20;i++)
@@ -215,7 +239,6 @@ void PlayScene3::timerEvent(QTimerEvent *)
                     label->move(300,250);
                     label->show();
                 }
-
             }
             pix=1;
         }
@@ -269,7 +292,7 @@ bool  PlayScene3::panduan()
             }
 
             a=0;b=0;
-           while((i-a-1>=0&&b-a-1>=0)&&array[i-a-1][j-a-1]==k)     //对右下方向进行判断
+           while((i-a-1>=0&&j-a-1>=0)&&array[i-a-1][j-a-1]==k)     //对右下方向进行判断
            {
                a++;
            }
@@ -284,7 +307,7 @@ bool  PlayScene3::panduan()
            }
 
            a=0;b=0;
-          while((i-a-1>=0&&b+a+1<20)&&array[i-a-1][j+a+1]==k)     //对左下方向进行判断
+          while((i-a-1>=0&&j+a+1<20)&&array[i-a-1][j+a+1]==k)     //对左下方向进行判断
           {
               a++;
           }
@@ -330,8 +353,6 @@ int   PlayScene3::pingfen(int A,int B,int C)
        }
               array[A][B]=0;             //调用完判断禁手函数后要将array数组中的值变回来
     }
-
-
     //判断竖直方向
     while(B-a-1>=0&&Array1[A][B-a-1]==C)
     {
@@ -351,10 +372,10 @@ int   PlayScene3::pingfen(int A,int B,int C)
             if(B+b+1<20&&Array1[A][B+b+1]==0)                //活五
                 sum=sum+60000;
             else                                            //眠五
-                sum=sum+50000;
+                sum=sum+20000;
         else
             if(B+b+1<20&&Array1[A][B+b+1]==0)                //眠五
-                sum=sum+50000;
+                sum=sum+20000;
             else
                 sum=sum+10;                                  //死五
     }
@@ -362,7 +383,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if(B-a-1>=0&&Array1[A][B-a-1]==0)
             if(B+b+1<20&&Array1[A][B+b+1]==0)                //活四
-                sum=sum+4000;
+                sum=sum+8000;
             else                                            //眠四
                 sum=sum+250;
         else
@@ -375,7 +396,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if(B-a-1>=0&&Array1[A][B-a-1]==0)
             if(B+b+1<20&&Array1[A][B+b+1]==0)                //活三
-                sum=sum+3000;
+                sum=sum+1800;
             else                                            //眠三
                 sum=sum+150;
         else
@@ -427,10 +448,10 @@ int   PlayScene3::pingfen(int A,int B,int C)
             if(A+b+1<20&&Array1[A+b+1][B]==0)                //活五
                 sum=sum+60000;
             else                                            //眠五
-                sum=sum+50000;
+                sum=sum+20000;
         else
             if(A+b+1<20&&Array1[A+b+1][B]==0)                //眠五
-                sum=sum+50000;
+                sum=sum+20000;
             else
                 sum=sum+10;                                  //死五
     }
@@ -438,7 +459,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if(A-a-1>=0&&Array1[A-a-1][B]==0)
             if(A+b+1<20&&Array1[A+b+1][B]==0)                //活四
-                sum=sum+4000;
+                sum=sum+8000;
             else                                            //眠四
                 sum=sum+2500;
         else
@@ -451,7 +472,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if(A-a-1>=0&&Array1[A-a-1][B]==0)
             if(A+b+1<20&&Array1[A+b+1][B]==0)                //活三
-                sum=sum+3000;
+                sum=sum+1800;
             else                                            //眠三
                 sum=sum+1500;
         else
@@ -503,10 +524,10 @@ int   PlayScene3::pingfen(int A,int B,int C)
             if((A+b+1<20&&B+b+1<20)&&Array1[A+b+1][B+b+1]==0)               //活五
                 sum=sum+60000;
             else                                            //眠五
-                sum=sum+50000;
+                sum=sum+20000;
         else
             if((A+b+1<20&&B+b+1<20)&&Array1[A+b+1][B+b+1]==0)                 //眠五
-                sum=sum+50000;
+                sum=sum+20000;
             else
                 sum=sum+10;                                  //死五
     }
@@ -514,7 +535,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if((A-a-1>=0&&B-a-1>=0)&&Array1[A-a-1][B-a-1]==0)
             if((A+b+1<20&&B+b+1<20)&&Array1[A+b+1][B+b+1]==0)                 //活四
-                sum=sum+4000;
+                sum=sum+8000;
             else                                            //眠四
                 sum=sum+2500;
         else
@@ -527,7 +548,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if((A-a-1>=0&&B-a-1>=0)&&Array1[A-a-1][B-a-1]==0)
             if((A+b+1<20&&B+b+1<20)&&Array1[A+b+1][B+b+1]==0)            //活三
-                sum=sum+3000;
+                sum=sum+1800;
             else                                            //眠三
                 sum=sum+1500;
         else
@@ -577,12 +598,12 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if((A-a-1>=0&&B+a+1<20)&&Array1[A-a-1][B+a+1]==0)
             if((A+b+1<20&&B-b-1>=0)&&Array1[A+b+1][B-b-1]==0)               //活五
-                sum=sum+6000;
+                sum=sum+60000;
             else                                            //眠五
-                sum=sum+5000;
+                sum=sum+20000;
         else
             if((A+b+1<20&&B-b-1>=0)&&Array1[A+b+1][B-b-1]==0)                 //眠五
-                sum=sum+5000;
+                sum=sum+20000;
             else
                 sum=sum+10;                                  //死五
     }
@@ -590,7 +611,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if((A-a-1>=0&&B+a+1<20)&&Array1[A-a-1][B+a+1]==0)
             if((A+b+1<20&&B-b-1>=0)&&Array1[A+b+1][B-b-1]==0)          //活四
-                sum=sum+4000;
+                sum=sum+8000;
             else                                            //眠四
                 sum=sum+2500;
         else
@@ -603,7 +624,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if((A-a-1>=0&&B+a+1<20)&&Array1[A-a-1][B+a+1]==0)
             if((A+b+1<20&&B-b-1>=0)&&Array1[A+b+1][B-b-1]==0)          //活三
-                sum=sum+3000;
+                sum=sum+1800;
             else                                            //眠三
                 sum=sum+1500;
         else
@@ -662,16 +683,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
         if(B-a-1>=0&&Array1[A][ B-a-1]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
         if(B-a-1>=0&&Array1[A][ B-a-1]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -701,16 +722,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
         if((B-a-1>=0&&A-a-1>=0)&&Array1[A-a-1][ B-a-1]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
         if((B-a-1>=0&&A-a-1>=0)&&Array1[A-a-1][ B-a-1]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -741,16 +762,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
         if(A-a-1>=0&&Array1[A-a-1][ B]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
        if(A-a-1>=0&&Array1[A-a-1][ B]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -780,16 +801,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
         if((A-a-1>=0&&B+a+1<20)&&Array1[A-a-1][B+a+1]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
        if((A-a-1>=0&&B+a+1<20)&&Array1[A-a-1][B+a+1]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -820,16 +841,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
        if(B+a+1<20&&Array1[A][ B+a+1]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
        if(B+a+1<20&&Array1[A][ B+a+1]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -860,16 +881,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
        if((B+a+1<20&&A+a+1<20)&&Array1[A+a+1][ B+a+1]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
         if((B+a+1<20&&A+a+1<20)&&Array1[A+a+1][ B+a+1]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -899,16 +920,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
        if(A+a+1<20&&Array1[A+a+1][ B]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
         if(A+a+1<20&&Array1[A+a+1][ B]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -939,16 +960,16 @@ int   PlayScene3::pingfen(int A,int B,int C)
     if(a==4)
     {
       if((B-a-1>=0&&A+a+1<20)&&Array1[A+a+1][ B-a-1]==0)
-            sum=sum+20000;
+            sum=sum+55000;
         else
-            sum=sum+1500;
+            sum=sum+4500;
     }
     if(a==3)
     {
         if((B-a-1>=0&&A+a+1<20)&&Array1[A+a+1][ B-a-1]==0)
-            sum=sum+2000;
+            sum=sum+5000;
         else
-            sum=sum+500;
+            sum=sum+3000;
     }
     if(a==2)
     {
@@ -982,7 +1003,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if(A-a-1>=0&&Array1[A-a-1][B]==0)
             if(A+b+1<20&&Array1[A+b+1][B]==0)
-                sum=sum+20000;
+                sum=sum+60000;
     }
     a=0;b=0;
     //左右方向
@@ -1002,7 +1023,7 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if(B-a-1>=0&&Array1[A][B-a-1]==0)
             if(B+b+1<20&&Array1[A][B+b+1]==0)
-                sum=sum+20000;
+                sum=sum+60000;
     }
 
     a=0;b=0;
@@ -1023,9 +1044,8 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if((B-a-1>=0&&A-a-1>=0)&&Array1[A-a-1][B-a-1]==0)
             if((B+b+1<20&&A+b+1<20)&&Array1[A+b+1][B+b+1]==0)
-                sum=sum+20000;
+                sum=sum+60000;
     }
-
     a=0;b=0;
     //右上、左下
     while ((B+a+1<20&&A-a-1>=0)&&Array1[A-a-1][B+a+1]==fan)
@@ -1044,11 +1064,10 @@ int   PlayScene3::pingfen(int A,int B,int C)
     {
         if((B-a-1>=0&&A-a-1>=0)&&Array1[A][B-a-1]==0)
             if((B+b+1<20&&A+b+1<20)&&Array1[A][B+b+1]==0)
-                sum=sum+20000;
+                sum=sum+60000;
     }
-    return sum;
+    return sum+1;
 }
-
 
 int PlayScene3::xiaqi()
  {
@@ -1060,13 +1079,12 @@ int PlayScene3::xiaqi()
          k=1;
      int a[20][20];
      int t=0;
-     int T=0;
-     //将数组a里面的值全部改为-10
+     //将数组a里面的值全部改为0
      for(int i=0;i<20;i++)
      {
          for(int j=0;j<20;j++)
          {
-          a[i][j]=-10;
+          a[i][j]=0;
          }
      }
      //如果数组array 里面为0，则说明该位置还没有下此时在数组a存储评分   把已经下了的排除在外
@@ -1087,19 +1105,6 @@ int PlayScene3::xiaqi()
                  t=a[i][j];
          }
      }
-//     qDebug()<<t;
-     //统计数组a里面评分最大的值有几个
-     for(int i=0;i<20;i++)
-     {
-         for(int j=0;j<20;j++)
-         {
-             if(a[i][j]==t)
-                 T++;
-         }
-     }
-    //如果有多个位置是最大评分则在这几个点中随机下一个点
-    int P =rand()%T+1;                      //产生一个1~P的随机数
-    int p=0;
     bool  l=false;
     for(int i=0;i<20;i++)
     {
@@ -1107,14 +1112,8 @@ int PlayScene3::xiaqi()
         {
             if(a[i][j]==t)
             {
-                p++;
-                if(p==P)
-                {
-                    r=100*i+j;
-                    l=true;
-//                    qDebug()<<a[i][j];
-                }
-
+               r=100*i+j;
+               l=true;
             }
             if(l)
                 break;
@@ -1349,6 +1348,7 @@ bool  PlayScene3::Panduan(int A,int B)
                 T[3]=1;
             }
     }
+
     int t=T[0]+T[1]+T[2]+T[3];
     if(t>1)
         return true;
@@ -1433,6 +1433,7 @@ bool  PlayScene3::Panduan(int A,int B)
             }
         }
     }
+
     a=0;b=0;
     //判断水平方向
     while(A-a-1>=0&&array[A-a-1][B]==1)
@@ -1509,6 +1510,8 @@ bool  PlayScene3::Panduan(int A,int B)
             }
         }
     }
+
+
     a=0;b=0;
     //判断右下斜对角线方向
     while((A-a-1>=0&&B-a-1>=0)&&array[A-a-1][B-a-1]==1)
@@ -1585,6 +1588,7 @@ bool  PlayScene3::Panduan(int A,int B)
             }
         }
     }
+
     a=0;b=0;
     //判断左下斜对角线方向
     while((A-a-1>=0&&B+a+1<20)&&array[A-a-1][B+a+1]==1)
@@ -1595,6 +1599,7 @@ bool  PlayScene3::Panduan(int A,int B)
     {
         b++;
     }
+
     if(a+b==3)
     {
         if(A-a-2>=0&&B+a+2<20)
@@ -1606,6 +1611,7 @@ bool  PlayScene3::Panduan(int A,int B)
                 if(array[A-a-1][B+a+1]==0&&array[A+b+1][B-b-1]==0&&array[A+b+2][B-b-2]==0)
                     T[3]=1;
     }
+
     if(a+b==2)
     {
         if(B+a+3<20&&A-a-3>=0)
@@ -1625,6 +1631,7 @@ bool  PlayScene3::Panduan(int A,int B)
           }
         }
     }
+
     if(a+b==1)
     {
         if(B+a+4<20&&A-a-4>=0)
@@ -1641,6 +1648,7 @@ bool  PlayScene3::Panduan(int A,int B)
                     T[0]=1;
         }
     }
+
     if(a+b==0)
     {
         if(A-a-5>=0&&B+a+5<20)
@@ -1651,15 +1659,22 @@ bool  PlayScene3::Panduan(int A,int B)
                     T[1]=1;
             }
         }
-        if(A+b+5<20&&B-b-1>=0)
+
+        if(A+b+5<20&&B-b-5>=0)
         {
             if(array[A+b+1][B-b-1]==0&&array[A+b+2][B-b-2]==1&&array[A+b+3][B-b-3]==1&&array[A+b+4][B-b-4]==1&&array[A+b+5][B-b-5]==0)
             {
+
                 if((A-a-1>=0&&B+a+1<20)&&array[A-a-1][B+a+1]==0)
                     T[1]=1;
+
             }
+
         }
+
     }
+
+
     t=T[0]+T[1]+T[2]+T[3];
     if(t>1)
         return true;
@@ -1671,6 +1686,8 @@ bool  PlayScene3::Panduan(int A,int B)
     {
         T[i]=0;
     }
+
+
     //对该格的四个方向进行判断 右 下 右下 左下
     while(B-a-1>=0&&array[A][B-a-1]==1)     //对水平方向进行判断
     {
@@ -1692,9 +1709,8 @@ bool  PlayScene3::Panduan(int A,int B)
         b++;
     }
      if(a+b>5){T[0]=2;}
-
     a=0;b=0;
-    while((A-a-1>=0&&b-a-1>=0)&&array[A-a-1][B-a-1]==1)     //对右下方向进行判断
+    while((A-a-1>=0&&B-a-1>=0)&&array[A-a-1][B-a-1]==1)     //对右下方向进行判断
     {
         a++;
     }
@@ -1703,9 +1719,8 @@ bool  PlayScene3::Panduan(int A,int B)
         b++;
     }
     if(a+b>5){T[0]=2;}
-
     a=0;b=0;
-    while((A-a-1>=0&&b+a+1<20)&&array[A-a-1][B+a+1]==1)     //对左下方向进行判断
+    while((A-a-1>=0&&B+a+1<20)&&array[A-a-1][B+a+1]==1)     //对左下方向进行判断
     {
        a++;
     }

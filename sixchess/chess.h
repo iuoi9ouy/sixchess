@@ -1,6 +1,6 @@
 ﻿#ifndef CHESS_H
 #define CHESS_H
-
+//失败
 #include <QPushButton>
 
 class chess : public QPushButton

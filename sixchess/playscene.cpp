@@ -115,7 +115,6 @@ void PlayScene1::mousePressEvent(QMouseEvent *ev)
         {
             jieshu=true;
             QString str="白子胜利";
-//            qDebug()<<str;
             label= new QLabel(this);
             label->setText(str);
             label->setFont(QFont(str,29,QFont::Bold));
@@ -129,7 +128,6 @@ void PlayScene1::mousePressEvent(QMouseEvent *ev)
         {
             jieshu=true;
             QString str="黑子胜利";
-            qDebug()<<str;
             label= new QLabel(this);
             label->setText(str);
             label->setFont(QFont(str,29,QFont::Bold));
@@ -140,7 +138,7 @@ void PlayScene1::mousePressEvent(QMouseEvent *ev)
         }
 
         //在下完黑子后pix变为2  此时判断黑子是否触发禁手
-        if(pix==2)
+        if(pix==2&&!jieshu)
         {
             if(Panduan(x,y))
             {

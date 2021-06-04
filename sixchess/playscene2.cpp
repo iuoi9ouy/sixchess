@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QFont>
 #include <QtGlobal>
+#include <QTime>
 PlayScene2::PlayScene2(QWidget *parent) : QMainWindow(parent)
 {
 //设置窗口
@@ -63,8 +64,8 @@ PlayScene2::PlayScene2(QWidget *parent) : QMainWindow(parent)
    btn2->setText("白子");
    btn2->move(this->width() - btn->width()-50 , this->height() - btn->height()-250);
 
-
-   int t=rand()%25;
+   qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+   int t=qrand()%25;
    x=8+t/5;
    y=8+t%5;
    //点击了白子按钮,将pix置为2，同时程序自动下下一颗黑子
@@ -224,18 +225,19 @@ void PlayScene2::mousePressEvent(QMouseEvent *ev)
                     if(DIYI&&pix==1)
                     {
                         DIYI=false;
-                        int n=rand()%9;//随机产生0-8的数
+                        qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+                        int n=qrand()%9;//随机产生0-8的数
                         while (n==4)     //避免下在黑子的位置
                         {
-                            n=rand()%9+1;
+                            n=qrand()%9+1;
                         }
                         array[x-1+n/3][y-1+n%3]=2;
                         QString str=":/res/004.png";
                         Chess[x-1+n/3][y-1+n%3]=new chess(str);
                         Chess[x-1+n/3][y-1+n%3]->setParent(this);
-                        Chess[x-1+n/3][y-1+n%3]->move(150+25*(y-1+n/3)-10,50+25*(x-1+n%3)-10);
+                        Chess[x-1+n/3][y-1+n%3]->move(150+25*(y-1+n%3)-10,50+25*(x-1+n/3)-10);
                         Chess[x-1+n/3][y-1+n%3]->show();
-//                        qDebug()<<x-1+n/3<<y-1+n%3;
+                        qDebug()<<x-1+n/3<<y-1+n%3;
                     }
                     else
                     {
@@ -245,14 +247,12 @@ void PlayScene2::mousePressEvent(QMouseEvent *ev)
                            int u=xiaqi();
                            x=u/100;
                            y=u%100;
-    //                       qDebug()<<u;
                         }
                         if(pix==2)
                         {
                             int u=xiaqi();
                             x=u/100;
                             y=u%100;
-    //                        qDebug()<<u;
                         }
                         if(pix==1)
                         {
@@ -386,7 +386,7 @@ bool  PlayScene2::panduan()
             }
 
             a=0;b=0;
-           while((i-a-1>=0&&b-a-1>=0)&&array[i-a-1][j-a-1]==k)     //对右下方向进行判断
+           while((i-a-1>=0&&j-a-1>=0)&&array[i-a-1][j-a-1]==k)     //对右下方向进行判断
            {
                a++;
            }
@@ -401,7 +401,7 @@ bool  PlayScene2::panduan()
            }
 
            a=0;b=0;
-          while((i-a-1>=0&&b+a+1<20)&&array[i-a-1][j+a+1]==k)     //对左下方向进行判断
+          while((i-a-1>=0&&j+a+1<20)&&array[i-a-1][j+a+1]==k)     //对左下方向进行判断
           {
               a++;
           }
@@ -944,7 +944,7 @@ bool  PlayScene2::Panduan(int A,int B)
                     T[1]=1;
             }
         }
-        if(A+b+5<20&&B-b-1>=0)
+        if(A+b+5<20&&B-b-5>=0)
         {
             if(array[A+b+1][B-b-1]==0&&array[A+b+2][B-b-2]==1&&array[A+b+3][B-b-3]==1&&array[A+b+4][B-b-4]==1&&array[A+b+5][B-b-5]==0)
             {
@@ -987,7 +987,7 @@ bool  PlayScene2::Panduan(int A,int B)
      if(a+b>5){T[0]=2;}
 
     a=0;b=0;
-    while((A-a-1>=0&&b-a-1>=0)&&array[A-a-1][B-a-1]==1)     //对右下方向进行判断
+    while((A-a-1>=0&&B-a-1>=0)&&array[A-a-1][B-a-1]==1)     //对右下方向进行判断
     {
         a++;
     }
@@ -998,7 +998,7 @@ bool  PlayScene2::Panduan(int A,int B)
     if(a+b>5){T[0]=2;}
 
     a=0;b=0;
-    while((A-a-1>=0&&b+a+1<20)&&array[A-a-1][B+a+1]==1)     //对左下方向进行判断
+    while((A-a-1>=0&&B+a+1<20)&&array[A-a-1][B+a+1]==1)     //对左下方向进行判断
     {
        a++;
     }
@@ -1767,13 +1767,12 @@ int PlayScene2::xiaqi()
          k=1;
      int a[20][20];
      int t=0;
-     int T=0;
      //将数组a里面的值全部改为-10
      for(int i=0;i<20;i++)
      {
          for(int j=0;j<20;j++)
          {
-          a[i][j]=-10;
+          a[i][j]=0;
          }
      }
      //如果数组array 里面为0，则说明该位置还没有下此时在数组a存储评分   把已经下了的排除在外
@@ -1794,18 +1793,6 @@ int PlayScene2::xiaqi()
                  t=a[i][j];
          }
      }
-     //统计数组a里面评分最大的值有几个
-     for(int i=0;i<20;i++)
-     {
-         for(int j=0;j<20;j++)
-         {
-             if(a[i][j]==t)
-                 T++;
-         }
-     }
-    //如果有多个位置是最大评分则在这几个点中随机下一个点
-    int P =rand()%T+1;                      //产生一个1~P的随机数
-    int p=0;
     bool  l=false;
     for(int i=0;i<20;i++)
     {
@@ -1813,13 +1800,8 @@ int PlayScene2::xiaqi()
         {
             if(a[i][j]==t)
             {
-                p++;
-                if(p==P)
-                {
-                    r=100*i+j;
-                    l=true;
-//                    qDebug()<<a[i][j];
-                }
+                r=100*i+j;
+                l=true;
 
             }
             if(l)

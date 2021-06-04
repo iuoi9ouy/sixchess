@@ -17,7 +17,7 @@ chess::chess(QString Img)
         return;
     }
     //设置图片固定大小
-    this->setFixedSize( 20,20);
+    this->setFixedSize(20,20);
     //设置不规则图片样式
     this->setStyleSheet("QPushButton{border:0px;}");
     //设置图标

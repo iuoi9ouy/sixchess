@@ -40,6 +40,7 @@ PlayScene4::PlayScene4(QWidget *parent) : QMainWindow(parent)
       connect(btn1,&QPushButton::clicked,this,[=](){
          client= new ClientWidget;
          client->show();
+         this->hide();
          connect( client,&ClientWidget::btnclicked,this,[=](){
              this->show(); //重新显示主场景
               client->hide();
@@ -63,6 +64,7 @@ PlayScene4::PlayScene4(QWidget *parent) : QMainWindow(parent)
       connect(btn2,&QPushButton::clicked,this,[=](){
          server= new ServerWidget;
          server->show();
+         this->hide();
          connect( server,&ServerWidget::btnclicked,this,[=](){
              this->show(); //重新显示主场景
             server->hide();

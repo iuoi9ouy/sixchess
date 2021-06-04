@@ -125,6 +125,17 @@ MainWindow::MainWindow(QWidget *parent)
          //隐藏主界面
          this->hide();
      });
+     QPushButton *btn8 = new QPushButton;
+     btn8->setParent(this);
+     //设置关闭按钮的大小
+     btn8->setFixedSize(60,40);
+     //设置关闭按钮上显示的内容
+     btn8->setText("关闭");
+     //移动关闭对弈按钮
+     btn8->move(this->width()-btn8->width(),this->height()-btn8->height());
+     connect(btn8,&QPushButton::clicked,[=](){
+         this->close();
+     });
 }
 
 MainWindow::~MainWindow()
